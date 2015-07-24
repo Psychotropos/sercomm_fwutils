@@ -1,0 +1,48 @@
+struct keybuf
+{
+	char md5_1[16]; // MD5_Update(offset(0x60), 32), MD5_Update(offset(0x20), 32)
+	char md5_2[16]; // MD5_Update(offset(0x80), 32), MD5_Update(offset(0x20), 32)
+	char md5_3[16]; // MD5_Update("\x53\x70\x65\x65\x64\x70\x6F\x72\x74\x20\x57\x20\x37\x32\x34\x56\x00\x00\x00\x00\x25\x73\x3A\x20\x73\x6B\x69\x70\x20\x6F\x66\x74", 32), MD5_Update(offset(0x20), 32)
+	char md5_sum[16]; // MD5_Update(&keybuf, 48) aka MD5 sum of the first 3 MD5s in the structure
+};
+Anything post-header (see hdrbuf, 160 bytes) is encrypted with AES 256 CBC.
+
+Only the first 32 bytes (md5_1 + md5_2) seem to be used as the key
+sub_1448 pseudo:
+m = md5.new()
+m.update(offset_from_file(0x60))
+m.update(offset_from_file(0x20))
+m2 = md5.new()
+m2.update(offset_from_file(0x80))
+m2.update(offset_from_file(0x20))
+m3 = md5.new()
+m3.update('\x53\x70\x65\x65\x64\x70\x6F\x72\x74\x20\x57\x20\x37\x32\x34\x56\x00\x00\x00\x00\x25\x73\x3A\x20\x73\x6B\x69\x70\x20\x6F\x66\x74')
+m3.update(offset_from_file(0x20))
+m4 = md5.new()
+m4.update(m.digest() + m2.digest() + m3.digest())
+
+sub_38A4 pseudo:
+EVP_CIPHER_CTX ctx;
+EVP_CIPHER_CTX_init(&ctx);
+EVP_DecryptInit(&ctx, EVP_aes_256_cbc(), keybuf, (hdrbuf + 0x40))
+
+loc_4304:
+$a0 = (hdrbuf + 0x60)
+$a1 = (hdrbuf + 0x80)
+$a2 = (hdrbuf + 0x20)
+$a3 = (keybuf)
+call sub_1448 (key calc routine)
+$a0 = (hdrfd)
+$a1 = (newfd)
+$a2 = (keybuf)
+$a3 = (hdrbuf + 0x40)
+call sub_38A4 (decrypt routine)
+
+struct hdrbuf
+{
+	char nullpad[32];
+	char firmware_ver[32];
+	char aes_iv[32]; // Note that only the 16 first bytes are used
+	char nullpad_2[32];
+	char filesize[32]; // As a string, used to determine the actual size of stage_2 image post-decryption, image is ftruncate()'d down to the size specified here during decrypt_fw (libfwutil.so)
+};

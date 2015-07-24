@@ -1,0 +1,17 @@
+First 160 bytes are the header (used for image validation, digest procedure yet to be reversed)
+A gzip stream follows
+
+Uncompressed gzip stream consists of two blocks:
+kernel_rootfs and bootloader
+The structure for each block is:
+
+struct upgrd_blck
+{
+	char name[32];
+	char payloadSize[32];
+	char version[32];
+	char pad[32];
+};
+
+After the payload of a block, the next block follows, if there is any.
+The payload of each block is a JFFS2 filesystem (big endian). The only exception is the DECT blob found in T-Mobile firmwares, whose format remains unknown.
