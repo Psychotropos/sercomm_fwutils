@@ -1,17 +1,27 @@
-First 160 bytes are the header (used for image validation, digest procedure yet to be reversed)
-A gzip stream follows
+The decrypted image contents start with an 160-byte header:
 
-Uncompressed gzip stream consists of two blocks:
-kernel_rootfs and bootloader
-The structure for each block is:
+struct img_hdr
+{
+        char dev_hdr[128]; // Unknown structure, static across all firmware builds for a device.
+        char gzip_stream_digest[32]; // SHA256 hash of the gzip stream that's past this header, calculated in chunks of 16384 bytes per pass.
+};
+
+A gzip stream follows (compression level 6).
+
+The decompressed gzip stream consists of blocks:
 
 struct upgrd_blck
 {
-	char name[32];
-	char payloadSize[32];
-	char version[32];
-	char pad[32];
+        char name[32];
+        char payloadSize[32];
+        char version[32];
+        char pad[32];
 };
 
 After the payload of a block, the next block follows, if there is any.
 The payload of each block is a JFFS2 filesystem (big endian). The only exception is the DECT blob found in T-Mobile firmwares, whose format remains unknown.
+
+The currently-known block types are:
+kernel_rootfs and bootloader (all Sercomm devices)
+dect (only observed in the T-Mobile variant of the Speedport W724V Type Ci)
+
