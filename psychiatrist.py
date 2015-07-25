@@ -3,20 +3,7 @@ import sys
 import os
 import gzip
 import cStringIO
-import hashlib
-
-def strip_nulls(str):
-	return str.strip('\x00')
-
-def calculate_digest(stream):
-	# Sending those signals, those digital signals.
-	ctx = hashlib.sha256()
-	while True:
-		chunk = stream.read(16384)
-		if not chunk:
-			break
-		ctx.update(chunk)
-	return ctx.digest()
+from sercomm_common import *
 
 def dump_blocks(stream):
 	while True:
@@ -36,11 +23,6 @@ def dump_blocks(stream):
 		except IOError:
 			print '[-] Failed to write firmware block ' + filename + ' to drive. Exiting.'
 			sys.exit()
-
-def verify_digest(stream, expectedDigest):
-	digest = calculate_digest(stream)
-	stream.seek(0)
-	return digest == expectedDigest
 
 def dump_dev_hdr(hdr):
 	try:
@@ -73,4 +55,4 @@ if len(sys.argv) == 2:
 	except IOError:
 		print '[-] Failed to acquire file handle to image!'
 else:
-	print '[-] Usage: python psychiatrist.py dumped_img'
+	print '[-] Usage: python psychiatrist.py decrypted_img'

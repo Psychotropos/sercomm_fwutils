@@ -6,11 +6,8 @@
 # ctx4.update(ctx1.digest() + ctx2.digest() + ctx3.digest())
 # These are calculated but never actually used, so we take them out.
 import sys
-import md5
+from sercomm_common import *
 from Crypto.Cipher import AES
-
-def strip_nulls(str):
-	return str.strip('\x00')
 
 def read_img(filename):
 	f = open(filename, 'rb')
@@ -21,15 +18,6 @@ def read_img(filename):
 	filesize = f.read(32)
 	remaining = f.read()
 	return (nullpad, ver, iv, nullpad2, filesize, remaining)
-
-def calc_key_and_iv_from_img(image):
-	ctx1 = md5.new()
-	ctx1.update(image[3])
-	ctx1.update(image[1])
-	ctx2 = md5.new()
-	ctx2.update(image[4])
-	ctx2.update(image[1])
-	return (ctx1.digest() + ctx2.digest(), image[2][:16])
 
 def dump_image(image, key_iv):
 	aes = AES.new(key_iv[0], AES.MODE_CBC, key_iv[1])
