@@ -1,6 +1,8 @@
 # Disable remote management and remote firmware updates on Sercomm's Speedport W 724 Typ C (tested on the OTE variant)
 # The same effect can be achieved (assuming you have access to a busybox shell on the router) by executing:
 # /usr/sbin/cmld_client set Device.ManagementServer.EnableCWMP=0
+# Requires the requests module for Python, which you can acquire using pip:
+# pip install requests
 import requests
 import sys
 import json
@@ -24,8 +26,7 @@ def get_id_and_values_of_vartype(res, vartype):
 
 def login(ip, password):
 	r = s.post('http://%s/data/Login.json' % (ip), data={'password': password, 'showpw':'0'})
-	decoded_res = json.loads(r.text)
-	result = get_value_by_vartype_and_varid(decoded_res, 'status', 'login')
+	result = get_value_by_vartype_and_varid(r.json(), 'status', 'login')
 	if result == 'success':
 		print "[+] Successfully logged into the router!"
 	else:
@@ -42,17 +43,15 @@ def scrape_csrf_token(ip):
 		sys.exit(0)
 	return token
 
-def get_rw_field_values(ip):
+def get_option_field_values(ip):
 	# rw module fields:
 	# fields_of_interest = ['use_dyndns', 'use_abuse', 'use_telephone', 'use_dect', 'use_answering', 'use_wlan', 'use_wlan_5ghz', 'use_wps', 'use_hsfon', 'use_repeater', 'easy_support_deactive', 'autofw_deactive', 'use_external_modem', 'use_internal_modem', 'use_internet', 'use_statusbericht', 'allow_ftp', 'allow_ftps', 'use_webnwalk', 'use_webnwalk_phone', 'use_dsl']
 	r = s.get('http://%s/data/Modules.json' % (ip))
-	decoded_res = json.loads(r.text)
-	return get_id_and_values_of_vartype(decoded_res, 'option')
+	return get_id_and_values_of_vartype(r.json(), 'option')
 
-def set_field_value(ip, csrf_token, field, value):
+def set_option_field_value(ip, csrf_token, field, value):
 	r = s.post('http://%s/data/Modules.json' % (ip), data={'sessionid': csrf_token, field: value})
-	decoded_res = json.loads(r.text)
-	if get_value_by_vartype_and_varid(decoded_res, 'option', field) != value:
+	if get_value_by_vartype_and_varid(r.json(), 'option', field) != value:
 		print "[-] Requested field value change for field %s failed to propagate! Exiting." % (field)
 		sys.exit(0)
 
@@ -65,13 +64,13 @@ if __name__ == "__main__":
 	print "[+] Logging into router..."
 	login(router_ip, router_password)
 	print "[+] Getting current settings..."
-	options = get_rw_field_values(router_ip)
+	options = get_option_field_values(router_ip)
 	if bool(options['autofw_deactive']) and bool(options['easy_support_deactive']):
 		print "[-] This router already has remote management disabled! Exiting."
 		sys.exit(0)
 	print "[+] Scraping CSRF token..."
 	csrf_token = scrape_csrf_token(router_ip)
 	print "[+] Disabling remote management..."
-	set_field_value(router_ip, csrf_token, 'autofw_deactive', '1')
-	set_field_value(router_ip, csrf_token, 'easy_support_deactive', '1')
+	set_option_field_value(router_ip, csrf_token, 'autofw_deactive', '1')
+	set_option_field_value(router_ip, csrf_token, 'easy_support_deactive', '1')
 	print "[+] Done!"
