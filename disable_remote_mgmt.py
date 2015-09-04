@@ -58,7 +58,7 @@ def set_field_value(ip, csrf_token, field, value):
 
 if __name__ == "__main__":
 	if len(sys.argv) != 3:
-		print "[-] Usage: python disable_remote_mgmt.py router_ip password"
+		print "[-] Usage: python disable_remote_mgmt.py router_ip router_password"
 		sys.exit(1)
 	router_ip = sys.argv[1]
 	router_password = sys.argv[2]
