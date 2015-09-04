@@ -25,7 +25,8 @@ def get_id_and_values_of_vartype(res, vartype):
 
 def login(ip, password):
 	r = s.post('http://%s/data/Login.json' % (ip), data={'password': password, 'showpw':'0'})
-	result = get_value_by_vartype_and_varid(r.json(), 'status', 'login')
+	decoded_res = r.json()
+	result = get_value_by_vartype_and_varid(decoded_res, 'status', 'login')
 	if result == 'success':
 		print "[+] Successfully logged into the router!"
 	else:
