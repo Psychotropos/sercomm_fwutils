@@ -5,7 +5,6 @@
 # pip install requests
 import requests
 import sys
-import json
 import re
 s = requests.Session()
 s.headers.update({'Accept-Language':'en-us'})
