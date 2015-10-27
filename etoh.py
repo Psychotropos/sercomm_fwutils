@@ -1,6 +1,6 @@
 # EtOH: Firmware builder for Sercomm devices, tested with images from T-Mobile's Speedport W 724V Type Ci (OTE & T-Mobile variants)
 # DISCLAIMER: I take no responsibility for any damage that may be caused to your device if you flash an EtOH-produced image to it. The resulting images have been compared and found to match with most OTEnet-ACSRepo issued images.
-# In some instances, there was some extra padding at the end of the original image, but since the image is fruncate()'d down to the length specified in the header, it should not matter.
+# In some instances, there was some extra padding at the end of the original image, but since the image is ftruncate()'d down to the length specified in the header, it should not matter.
 # It is your responsibility to verify the integrity of any images produced by EtOH.
 import cStringIO
 import glob
