@@ -1,5 +1,6 @@
 import hashlib
 import cStringIO
+import os
 
 def strip_nulls(str):
 	return str.strip('\x00')
