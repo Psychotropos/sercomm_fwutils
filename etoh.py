@@ -39,7 +39,6 @@ def create_image():
 	except IOError:
 		print '[-] Failed to read device header. Exiting.'
 		sys.exit()
-	get_blocks()
 	stream = cStringIO.StringIO()
 	blocks = get_blocks()
 	for block in blocks:
