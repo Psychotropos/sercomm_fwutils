@@ -236,7 +236,8 @@ class Type2(Image):
         self.fw_version = fw_version
         self.filesize = len(stage2_image)
         self.key_factor = os.urandom(32)
-        self.iv = os.urandom(32)
+        #self.iv = os.urandom(32)
+        self.iv = '\x00' * 32
         image_key = self.getKeyPair()
         aes = AES.new(key=image_key['key'], mode=AES.MODE_CBC, IV=image_key['iv'][:16]) # NB: Only the first 16 bytes are used
         self.stream.write('\x00' * 32) # Null digest for initial digest calculation
