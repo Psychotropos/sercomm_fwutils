@@ -16,5 +16,8 @@ if __name__ == "__main__":
         if not image.validateType():
             print('[-] Not a type2 image either, exiting')
             sys.exit(2)
+    aes_info = image.getKeyPair()
+    print('[+] Image key: %s' % aes_info['key'].encode('hex'))
+    print('[+] Image IV: %s' % aes_info['iv'].encode('hex'))
     open(out_file, 'wb').write(image.decryptImage())
     print('[+] Wrote decrypted image to %s!' % out_file)
