@@ -228,7 +228,7 @@ class Type2(Image):
         digest_fin.update(digest_1.digest())
         digest_fin.update(digest_2.digest())
         digest_fin.update(digest_3.digest())
-        key = Type2.keyPermutator(digest_fin.hexdigest())
+        key = Type2.keyPermutator(sercomm_hexdigest(digest_fin.digest()))
         return dict(key=key, iv=self.iv[:16])
 
     def createImage(self, fw_version, stage2_image):

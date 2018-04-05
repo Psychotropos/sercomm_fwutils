@@ -11,7 +11,7 @@ if __name__ == "__main__":
     print('[+] Trying to interpret file as type1 image...')
     image = Type1(file_data)
     if not image.validateType():
-        print('[-] File does not appear to be a valid type2 image, trying type2...')
+        print('[-] File does not appear to be a valid type1 image, trying type2...')
         image = Type2(file_data)
         if not image.validateType():
             print('[-] Not a type2 image either, exiting')
