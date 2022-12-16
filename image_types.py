@@ -2,7 +2,7 @@ from utils import *
 from block_descriptor import *
 from Crypto.Cipher import AES
 import hashlib
-import cStringIO
+from io import BytesIO
 import gzip
 import json
 import gzip_mod
@@ -11,7 +11,7 @@ import os
 
 class Image:
     def __init__(self, image_data, read=True):
-        self.stream = cStringIO.StringIO(image_data)
+        self.stream = BytesIO(image_data)
         self.stream_len = len(image_data)
         if read:
             self.readHeader()
@@ -115,8 +115,8 @@ class Stage2(Image):
             print('[-] Failed to write manifest to file!')
 
     def createImage(self):
-        self.stream = cStringIO.StringIO()
-        content_stream = cStringIO.StringIO()
+        self.stream = BytesIO()
+        content_stream = BytesIO()
         gzip_wrapper = gzip_mod.GzipFile(filename = None, mode = 'wb', fileobj = content_stream, compresslevel = 6)
         for block in self.blocks:
             print('[+] Writing block with name %s and version %s to stream...' % (block.block_name, block.block_version))
@@ -166,7 +166,7 @@ class Type1(Image):
         return dict(key=key, iv=self.iv[:16])
 
     def createImage(self, fw_version, stage2_image):
-        self.stream = cStringIO.StringIO()
+        self.stream = BytesIO()
         self.nullpad = '\x00' * 32
         self.nullpad2 = '\x00' * 32
         self.fw_version = fw_version
@@ -202,7 +202,7 @@ class Type2(Image):
         cur_pos = self.stream.tell()
         self.stream.seek(32) # Skip original image digest
         digest = hashlib.new('sha256')
-        digest.update(('\x00' * 32) + self.stream.read())
+        digest.update((b'\x00' * 32) + self.stream.read())
         self.stream.seek(cur_pos)
         return digest.digest() == self.image_digest
 
@@ -232,7 +232,7 @@ class Type2(Image):
         return dict(key=key, iv=self.iv[:16])
 
     def createImage(self, fw_version, stage2_image):
-        self.stream = cStringIO.StringIO()
+        self.stream = BytesIO()
         self.fw_version = fw_version
         self.filesize = len(stage2_image)
         self.key_factor = os.urandom(32)
