@@ -2,6 +2,7 @@ def nullpad_str(s, length):
     return s + ('\x00' * (length - len(s)))
 
 def unnullpad_str(s):
+    s = s.decode()
     if '\x00' not in s:
         return s
 
